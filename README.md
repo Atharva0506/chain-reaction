@@ -16,21 +16,29 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# Rules of the Game
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+This game is a two-player (Red and Green) board game that can be generalized to any number of players.
 
-## Learn More
+## Gameplay
 
-To learn more about Next.js, take a look at the following resources:
+The gameplay takes place on an m x n board, commonly sized as 9 x 6. Each cell in the board has a critical mass, defined as the number of orthogonally adjacent cells. For typical cells, the critical mass is 4; for cells on the edge, it's 3, and for corner cells, it's 2. 
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+All cells start as empty. Players take turns placing "orbs" of their respective colors. The Red player can only place red orbs in empty cells or cells containing one or more red orbs. When multiple orbs are placed in a cell, they stack.
 
-## Deploy on Vercel
+## Explosion Mechanism
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+When a cell's orb count reaches its critical mass, it explodes. The explosion distributes one orb to each orthogonally adjacent cell, and the exploding cell loses orbs equal to its critical mass. The explosions may cause adjacent cells to overload, triggering a chain reaction of explosions until stability is achieved.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Conversion Rule
+
+When a red cell explodes near green cells, the green cells turn red, and vice versa. This conversion follows the same explosion rules.
+
+## Winning Condition
+
+The game concludes when a player eliminates all orbs belonging to the other players. The remaining player is declared the winner.
+
+
+
