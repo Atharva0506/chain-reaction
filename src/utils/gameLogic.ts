@@ -1,69 +1,120 @@
-interface Cell {
-    orbs: number;
-    color: string | null;
-}
+// Jai Shree Ram
 
-export function initializeBoard(m: number, n: number): Cell[][] {
-    const board: Cell[][] = [];
-    for (let i = 0; i < m; i++) {
-        const row: Cell[] = [];
-        for (let j = 0; j < n; j++) {
-            row.push({ orbs: 0, color: null });
-        }
-        board.push(row);
+class ChainReactionGame {
+    rows: number;
+    cols: number;
+    numPlayers: number;
+    currentPlayer: number;
+    grid: { player: number; atoms: number; }[][];
+    turnComplete: boolean;
+    
+    constructor(rows:number, cols:number, numPlayers:number) {
+        this.rows = rows;
+        this.cols = cols;
+        this.numPlayers = numPlayers;
+        this.currentPlayer = 1;
+        this.grid = this.createGrid();
+        this.turnComplete = false; // Flag to indicate whether a player's turn is complete
     }
-    return board;
-}
 
-export function addOrb(cell: Cell, color: string): void {
-    cell.orbs += 1;
-    cell.color = color;
-}
+    createGrid() {
+        let grid = [];
+        for (let i = 0; i < this.rows; i++) {
+            let row = [];
+            for (let j = 0; j < this.cols; j++) {
+                row.push({ player: 0, atoms: 0 }); // Initialize each cell with player 0 (empty) and 0 atoms
+            }
+            grid.push(row);
+        }
+        return grid;
+    }
 
-export function explodeCell(cell: Cell, board: Cell[][]): void {
-    const neighbors = [
-        { dx: -1, dy: 0 },
-        { dx: 1, dy: 0 },
-        { dx: 0, dy: -1 },
-        { dx: 0, dy: 1 }
-    ];
-    for (const { dx, dy } of neighbors) {
-        const nx = cell.x + dx;
-        const ny = cell.y + dy;
-        if (nx >= 0 && nx < board.length && ny >= 0 && ny < board[0].length) {
-            const adjacentCell = board[nx][ny];
-            addOrb(adjacentCell, cell.color!);
-            cell.orbs -= 1;
+    placeAtom(row:number, col:number) {
+        let cell = this.grid[row][col];
+        if (cell.player === this.currentPlayer || cell.player === 0) { // Check if the cell is owned by the current player or empty
+            cell.player = this.currentPlayer;
+            cell.atoms++;
+            this.checkExplosions(row, col);
+            return true; // Atom placed successfully
+        }
+        return false; // Cannot place atom in this cell
+    }
+
+    checkExplosions(row:number, col:number) {
+        let cell = this.grid[row][col];
+        let criticalMass = this.getCriticalMass(row, col);
+        if (cell.atoms >= criticalMass) {
+            cell.atoms -= criticalMass;
+            this.grid[row][col] = { player: 0, atoms: 0 }; // Empty the cell after explosion
+            // Explode adjacent cells
+            this.explodeAdjacent(row - 1, col);
+            this.explodeAdjacent(row + 1, col);
+            this.explodeAdjacent(row, col - 1);
+            this.explodeAdjacent(row, col + 1);
         }
     }
-}
 
-export function convertCells(cell: Cell, color: string, board: Cell[][]): void {
-    if (cell.color !== color) {
-        cell.color = color;
-        if (cell.orbs >= 4) { // Assuming 4 is the critical mass
-            explodeCell(cell, board);
+    explodeAdjacent(row:number, col:number) {
+        if (row >= 0 && row < this.rows && col >= 0 && col < this.cols) {
+            this.grid[row][col].atoms++;
+            this.checkExplosions(row, col);
         }
     }
-}
 
-export function checkWinner(board: Cell[][]): string | null {
-    let redOrbs = 0;
-    let greenOrbs = 0;
-    for (const row of board) {
-        for (const cell of row) {
-            if (cell.color === 'red') {
-                redOrbs += cell.orbs;
-            } else if (cell.color === 'green') {
-                greenOrbs += cell.orbs;
+    getCriticalMass(row:number, col:number) {
+        if ((row === 0 || row === this.rows - 1) && (col === 0 || col === this.cols - 1)) {
+            return 2; // Corner cell
+        } else if (row === 0 || row === this.rows - 1 || col === 0 || col === this.cols - 1) {
+            return 3; // Edge cell
+        } else {
+            return 4; // Regular cell
+        }
+    }
+
+    calculateScore(player:number) {
+        let score = 0;
+        for (let i = 0; i < this.rows; i++) {
+            for (let j = 0; j < this.cols; j++) {
+                if (this.grid[i][j].player === player) {
+                    score += this.grid[i][j].atoms;
+                }
             }
         }
+        return score;
     }
-    if (redOrbs === 0) {
-        return 'Green';
-    } else if (greenOrbs === 0) {
-        return 'Red';
-    } else {
-        return null;
+
+    getHeuristicValue() {
+        const currentPlayerScore = this.calculateScore(this.currentPlayer);
+        const opponentPlayer = this.currentPlayer === 1 ? 2 : 1;
+        const opponentPlayerScore = this.calculateScore(opponentPlayer);
+        if (currentPlayerScore === 0) {
+            return Number.NEGATIVE_INFINITY; // Player loses
+        } else if (opponentPlayerScore === 0) {
+            return Number.POSITIVE_INFINITY; // Player wins
+        } else {
+            return currentPlayerScore - opponentPlayerScore;
+        }
     }
+
+    switchPlayer() {
+        this.currentPlayer = (this.currentPlayer % this.numPlayers) + 1; // Cycle through players
+        this.turnComplete = false; // Reset the turnComplete flag for the next player
+    }
+
+    endTurn() {
+        this.turnComplete = true; // Set the turnComplete flag to true
+    }
+
+    printGrid() {
+        for (let i = 0; i < this.rows; i++) {
+            let row = '';
+            for (let j = 0; j < this.cols; j++) {
+                row += this.grid[i][j].player + '-' + this.grid[i][j].atoms + ' ';
+            }
+            console.log(row);
+        }
+    }
+
 }
+
+export {ChainReactionGame};

@@ -1,21 +1,18 @@
 "use client"
 
-import GameBoard from "@/components/GameBoard"
+import React from 'react';
+import Header from '@/components/Header';
+import GameBoard from '@/components/GameBoard';
 
 const Home: React.FC = () => {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen py-2">
-        <main className="flex flex-col items-center justify-center w-full flex-1 px-20 text-center">
-          <h1 className="text-6xl font-bold">
-            Welcome to Your Game
-          </h1>
-          <GameBoard />
-        </main>
-        <footer className="flex items-center justify-center w-full h-24 border-t">
-          Footer
-        </footer>
+  return (
+    <div className="container mx-auto">
+      <Header />
+      <div className="flex justify-center mt-8">
+        <GameBoard rows={9} columns={6} />
       </div>
-    );
-  };
-  
-  export default Home;
+    </div>
+  );
+};
+
+export default Home;
