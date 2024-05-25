@@ -1,5 +1,3 @@
-// Jai Shree Ram
-
 class ChainReactionGame {
     rows: number;
     cols: number;
@@ -8,7 +6,7 @@ class ChainReactionGame {
     grid: { player: number; atoms: number; }[][];
     turnComplete: boolean;
     
-    constructor(rows:number, cols:number, numPlayers:number) {
+    constructor(rows: number, cols: number, numPlayers: number) {
         this.rows = rows;
         this.cols = cols;
         this.numPlayers = numPlayers;
@@ -29,9 +27,9 @@ class ChainReactionGame {
         return grid;
     }
 
-    placeAtom(row:number, col:number) {
+    placeAtom(row: number, col: number) {
         let cell = this.grid[row][col];
-        if (cell.player === this.currentPlayer || cell.player === 0) { // Check if the cell is owned by the current player or empty
+        if (this.isValidMove(row, col, this.currentPlayer)) { // Check if the cell is owned by the current player or empty
             cell.player = this.currentPlayer;
             cell.atoms++;
             this.checkExplosions(row, col);
@@ -40,7 +38,7 @@ class ChainReactionGame {
         return false; // Cannot place atom in this cell
     }
 
-    checkExplosions(row:number, col:number) {
+    checkExplosions(row: number, col: number) {
         let cell = this.grid[row][col];
         let criticalMass = this.getCriticalMass(row, col);
         if (cell.atoms >= criticalMass) {
@@ -54,14 +52,15 @@ class ChainReactionGame {
         }
     }
 
-    explodeAdjacent(row:number, col:number) {
+    explodeAdjacent(row: number, col: number) {
         if (row >= 0 && row < this.rows && col >= 0 && col < this.cols) {
+            this.grid[row][col].player = this.currentPlayer;
             this.grid[row][col].atoms++;
             this.checkExplosions(row, col);
         }
     }
 
-    getCriticalMass(row:number, col:number) {
+    getCriticalMass(row: number, col: number) {
         if ((row === 0 || row === this.rows - 1) && (col === 0 || col === this.cols - 1)) {
             return 2; // Corner cell
         } else if (row === 0 || row === this.rows - 1 || col === 0 || col === this.cols - 1) {
@@ -71,7 +70,7 @@ class ChainReactionGame {
         }
     }
 
-    calculateScore(player:number) {
+    calculateScore(player: number) {
         let score = 0;
         for (let i = 0; i < this.rows; i++) {
             for (let j = 0; j < this.cols; j++) {
@@ -115,6 +114,89 @@ class ChainReactionGame {
         }
     }
 
+    minimax(depth: number, isMaximizingPlayer: boolean): number {
+        if (depth === 0 || this.isGameOver()) {
+            return this.getHeuristicValue();
+        }
+
+        if (isMaximizingPlayer) {
+            let maxEval = Number.NEGATIVE_INFINITY;
+            for (let i = 0; i < this.rows; i++) {
+                for (let j = 0; j < this.cols; j++) {
+                    if (this.isValidMove(i, j, this.currentPlayer)) {
+                        this.placeAtom(i, j);
+                        this.switchPlayer();
+                        let eval = this.minimax(depth - 1, false);
+                        this.undoMove(i, j);
+                        this.switchPlayer();
+                        maxEval = Math.max(maxEval, eval);
+                    }
+                }
+            }
+            return maxEval;
+        } else {
+            let minEval = Number.POSITIVE_INFINITY;
+            for (let i = 0; i < this.rows; i++) {
+                for (let j = 0; j < this.cols; j++) {
+                    if (this.isValidMove(i, j, this.currentPlayer)) {
+                        this.placeAtom(i, j);
+                        this.switchPlayer();
+                        let eval = this.minimax(depth - 1, true);
+                        this.undoMove(i, j);
+                        this.switchPlayer();
+                        minEval = Math.min(minEval, eval);
+                    }
+                }
+            }
+            return minEval;
+        }
+    }
+
+    findBestMove(depth: number): { row: number, col: number } {
+        let bestMove = { row: -1, col: -1 };
+        let bestValue = Number.NEGATIVE_INFINITY;
+        
+        for (let i = 0; i < this.rows; i++) {
+            for (let j = 0; j < this.cols; j++) {
+                if (this.isValidMove(i, j, this.currentPlayer)) {
+                    this.placeAtom(i, j);
+                    this.switchPlayer();
+                    let moveValue = this.minimax(depth - 1, false);
+                    this.undoMove(i, j);
+                    this.switchPlayer();
+                    
+                    if (moveValue > bestValue) {
+                        bestMove = { row: i, col: j };
+                        bestValue = moveValue;
+                    }
+                }
+            }
+        }
+        
+        return bestMove;
+    }
+
+    isValidMove(row: number, col: number, player: number): boolean {
+        let cell = this.grid[row][col];
+        return cell.player === player || cell.player === 0;
+    }
+
+    isGameOver(): boolean {
+        let player1Score = this.calculateScore(1);
+        let player2Score = this.calculateScore(2);
+        return player1Score === 0 || player2Score === 0;
+    }
+
+    undoMove(row: number, col: number) {
+        // Implement logic to undo the last move made at (row, col)
+        let cell = this.grid[row][col];
+        if (cell.atoms > 0) {
+            cell.atoms--;
+            if (cell.atoms === 0) {
+                cell.player = 0;
+            }
+        }
+    }
 }
 
-export {ChainReactionGame};
+export { ChainReactionGame };
