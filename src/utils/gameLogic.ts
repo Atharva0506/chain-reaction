@@ -12,7 +12,7 @@ class ChainReactionGame {
         this.numPlayers = numPlayers;
         this.currentPlayer = 1;
         this.grid = this.createGrid();
-        this.turnComplete = false; // Flag to indicate whether a player's turn is complete
+        this.turnComplete = false;
     }
 
     createGrid() {
@@ -20,7 +20,7 @@ class ChainReactionGame {
         for (let i = 0; i < this.rows; i++) {
             let row = [];
             for (let j = 0; j < this.cols; j++) {
-                row.push({ player: 0, atoms: 0 }); // Initialize each cell with player 0 (empty) and 0 atoms
+                row.push({ player: 0, atoms: 0 });
             }
             grid.push(row);
         }
@@ -28,14 +28,14 @@ class ChainReactionGame {
     }
 
     placeAtom(row: number, col: number) {
-        let cell = this.grid[row][col];
-        if (this.isValidMove(row, col, this.currentPlayer)) { // Check if the cell is owned by the current player or empty
+        if (this.isValidMove(row, col, this.currentPlayer)) {
+            let cell = this.grid[row][col];
             cell.player = this.currentPlayer;
             cell.atoms++;
             this.checkExplosions(row, col);
-            return true; // Atom placed successfully
+            return true;
         }
-        return false; // Cannot place atom in this cell
+        return false;
     }
 
     checkExplosions(row: number, col: number) {
@@ -43,8 +43,7 @@ class ChainReactionGame {
         let criticalMass = this.getCriticalMass(row, col);
         if (cell.atoms >= criticalMass) {
             cell.atoms -= criticalMass;
-            this.grid[row][col] = { player: 0, atoms: 0 }; // Empty the cell after explosion
-            // Explode adjacent cells
+            this.grid[row][col] = { player: 0, atoms: 0 };
             this.explodeAdjacent(row - 1, col);
             this.explodeAdjacent(row + 1, col);
             this.explodeAdjacent(row, col - 1);
@@ -62,11 +61,11 @@ class ChainReactionGame {
 
     getCriticalMass(row: number, col: number) {
         if ((row === 0 || row === this.rows - 1) && (col === 0 || col === this.cols - 1)) {
-            return 2; // Corner cell
+            return 2;
         } else if (row === 0 || row === this.rows - 1 || col === 0 || col === this.cols - 1) {
-            return 3; // Edge cell
+            return 3;
         } else {
-            return 4; // Regular cell
+            return 4;
         }
     }
 
@@ -87,21 +86,21 @@ class ChainReactionGame {
         const opponentPlayer = this.currentPlayer === 1 ? 2 : 1;
         const opponentPlayerScore = this.calculateScore(opponentPlayer);
         if (currentPlayerScore === 0) {
-            return Number.NEGATIVE_INFINITY; // Player loses
+            return Number.NEGATIVE_INFINITY;
         } else if (opponentPlayerScore === 0) {
-            return Number.POSITIVE_INFINITY; // Player wins
+            return Number.POSITIVE_INFINITY;
         } else {
             return currentPlayerScore - opponentPlayerScore;
         }
     }
 
     switchPlayer() {
-        this.currentPlayer = (this.currentPlayer % this.numPlayers) + 1; // Cycle through players
-        this.turnComplete = false; // Reset the turnComplete flag for the next player
+        this.currentPlayer = (this.currentPlayer % this.numPlayers) + 1;
+        this.turnComplete = false;
     }
 
     endTurn() {
-        this.turnComplete = true; // Set the turnComplete flag to true
+        this.turnComplete = true;
     }
 
     printGrid() {
@@ -126,10 +125,10 @@ class ChainReactionGame {
                     if (this.isValidMove(i, j, this.currentPlayer)) {
                         this.placeAtom(i, j);
                         this.switchPlayer();
-                        let eval = this.minimax(depth - 1, false);
+                        let _eval = this.minimax(depth - 1, false);
                         this.undoMove(i, j);
                         this.switchPlayer();
-                        maxEval = Math.max(maxEval, eval);
+                        maxEval = Math.max(maxEval, _eval);
                     }
                 }
             }
@@ -141,10 +140,10 @@ class ChainReactionGame {
                     if (this.isValidMove(i, j, this.currentPlayer)) {
                         this.placeAtom(i, j);
                         this.switchPlayer();
-                        let eval = this.minimax(depth - 1, true);
+                        let _eval = this.minimax(depth - 1, true);
                         this.undoMove(i, j);
                         this.switchPlayer();
-                        minEval = Math.min(minEval, eval);
+                        minEval = Math.min(minEval, _eval);
                     }
                 }
             }
@@ -155,7 +154,7 @@ class ChainReactionGame {
     findBestMove(depth: number): { row: number, col: number } {
         let bestMove = { row: -1, col: -1 };
         let bestValue = Number.NEGATIVE_INFINITY;
-        
+
         for (let i = 0; i < this.rows; i++) {
             for (let j = 0; j < this.cols; j++) {
                 if (this.isValidMove(i, j, this.currentPlayer)) {
@@ -164,7 +163,7 @@ class ChainReactionGame {
                     let moveValue = this.minimax(depth - 1, false);
                     this.undoMove(i, j);
                     this.switchPlayer();
-                    
+
                     if (moveValue > bestValue) {
                         bestMove = { row: i, col: j };
                         bestValue = moveValue;
@@ -172,7 +171,7 @@ class ChainReactionGame {
                 }
             }
         }
-        
+
         return bestMove;
     }
 
@@ -188,7 +187,6 @@ class ChainReactionGame {
     }
 
     undoMove(row: number, col: number) {
-        // Implement logic to undo the last move made at (row, col)
         let cell = this.grid[row][col];
         if (cell.atoms > 0) {
             cell.atoms--;
