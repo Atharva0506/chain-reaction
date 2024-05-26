@@ -21,6 +21,11 @@ export default function Home() {
         <button className="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">
           Start Game
         </button>
+        <footer className="mt-auto py-4">
+        <p className="text-gray-500">
+          © {new Date().getFullYear()} Chain Reaction. All rights reserved.
+        </p>
+      </footer>
       </main>
 
       
