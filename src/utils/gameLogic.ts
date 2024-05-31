@@ -1,11 +1,17 @@
+interface Cell {
+    player: number;
+    atoms: number;
+}
+
 class ChainReactionGame {
     rows: number;
     cols: number;
     numPlayers: number;
     currentPlayer: number;
-    grid: { player: number; atoms: number; }[][];
+    grid: Cell[][];
     turnComplete: boolean;
-    
+    turnCounter: number;
+
     constructor(rows: number, cols: number, numPlayers: number) {
         this.rows = rows;
         this.cols = cols;
@@ -13,12 +19,13 @@ class ChainReactionGame {
         this.currentPlayer = 1;
         this.grid = this.createGrid();
         this.turnComplete = false;
+        this.turnCounter = 0; // Counter to keep track of the number of turns
     }
 
-    createGrid() {
-        let grid = [];
+    createGrid(): Cell[][] {
+        let grid: Cell[][] = [];
         for (let i = 0; i < this.rows; i++) {
-            let row = [];
+            let row: Cell[] = [];
             for (let j = 0; j < this.cols; j++) {
                 row.push({ player: 0, atoms: 0 });
             }
@@ -27,7 +34,7 @@ class ChainReactionGame {
         return grid;
     }
 
-    placeAtom(row: number, col: number) {
+    placeAtom(row: number, col: number): boolean {
         if (this.isValidMove(row, col, this.currentPlayer)) {
             let cell = this.grid[row][col];
             cell.player = this.currentPlayer;
@@ -38,7 +45,7 @@ class ChainReactionGame {
         return false;
     }
 
-    checkExplosions(row: number, col: number) {
+    checkExplosions(row: number, col: number): void {
         let cell = this.grid[row][col];
         let criticalMass = this.getCriticalMass(row, col);
         if (cell.atoms >= criticalMass) {
@@ -51,7 +58,7 @@ class ChainReactionGame {
         }
     }
 
-    explodeAdjacent(row: number, col: number) {
+    explodeAdjacent(row: number, col: number): void {
         if (row >= 0 && row < this.rows && col >= 0 && col < this.cols) {
             this.grid[row][col].player = this.currentPlayer;
             this.grid[row][col].atoms++;
@@ -59,7 +66,7 @@ class ChainReactionGame {
         }
     }
 
-    getCriticalMass(row: number, col: number) {
+    getCriticalMass(row: number, col: number): number {
         if ((row === 0 || row === this.rows - 1) && (col === 0 || col === this.cols - 1)) {
             return 2;
         } else if (row === 0 || row === this.rows - 1 || col === 0 || col === this.cols - 1) {
@@ -69,7 +76,7 @@ class ChainReactionGame {
         }
     }
 
-    calculateScore(player: number) {
+    calculateScore(player: number): number {
         let score = 0;
         for (let i = 0; i < this.rows; i++) {
             for (let j = 0; j < this.cols; j++) {
@@ -81,7 +88,7 @@ class ChainReactionGame {
         return score;
     }
 
-    getHeuristicValue() {
+    getHeuristicValue(): number {
         const currentPlayerScore = this.calculateScore(this.currentPlayer);
         const opponentPlayer = this.currentPlayer === 1 ? 2 : 1;
         const opponentPlayerScore = this.calculateScore(opponentPlayer);
@@ -94,16 +101,16 @@ class ChainReactionGame {
         }
     }
 
-    switchPlayer() {
+    switchPlayer(): void {
         this.currentPlayer = (this.currentPlayer % this.numPlayers) + 1;
         this.turnComplete = false;
     }
 
-    endTurn() {
+    endTurn(): void {
         this.turnComplete = true;
     }
 
-    printGrid() {
+    printGrid(): void {
         for (let i = 0; i < this.rows; i++) {
             let row = '';
             for (let j = 0; j < this.cols; j++) {
@@ -114,7 +121,7 @@ class ChainReactionGame {
     }
 
     minimax(depth: number, isMaximizingPlayer: boolean): number {
-        if (depth === 0 || this.isGameOver()) {
+        if (depth === 0 || this.isGameOver().gameOver) {
             return this.getHeuristicValue();
         }
 
@@ -180,13 +187,23 @@ class ChainReactionGame {
         return cell.player === player || cell.player === 0;
     }
 
-    isGameOver(): boolean {
-        let player1Score = this.calculateScore(1);
-        let player2Score = this.calculateScore(2);
-        return player1Score === 0 || player2Score === 0;
+    isGameOver(): { gameOver: boolean, winner: number | null } {
+        let activePlayers = new Set<number>();
+        for (let i = 0; i < this.rows; i++) {
+            for (let j = 0; j < this.cols; j++) {
+                if (this.grid[i][j].player !== 0) {
+                    activePlayers.add(this.grid[i][j].player);
+                }
+            }
+        }
+        if (activePlayers.size === 1) {
+            return { gameOver: true, winner: [...activePlayers][0] };
+        } else {
+            return { gameOver: false, winner: null };
+        }
     }
 
-    undoMove(row: number, col: number) {
+    undoMove(row: number, col: number): void {
         let cell = this.grid[row][col];
         if (cell.atoms > 0) {
             cell.atoms--;
@@ -197,4 +214,4 @@ class ChainReactionGame {
     }
 }
 
-export { ChainReactionGame };
+export { ChainReactionGame, Cell };
