@@ -12,6 +12,7 @@ class ChainReactionGame {
     turnComplete: boolean;
     turnCounter: number;
 
+
     constructor(rows: number, cols: number, numPlayers: number) {
         this.rows = rows;
         this.cols = cols;
@@ -106,19 +107,21 @@ class ChainReactionGame {
         this.turnComplete = false;
     }
 
-    endTurn(): void {
-        this.turnComplete = true;
-    }
+    // endTurn(): void {
+    //     this.turnComplete = true;
+    // }
 
-    printGrid(): void {
-        for (let i = 0; i < this.rows; i++) {
-            let row = '';
-            for (let j = 0; j < this.cols; j++) {
-                row += this.grid[i][j].player + '-' + this.grid[i][j].atoms + ' ';
-            }
-            console.log(row);
-        }
-    }
+
+    //    Just For Node JS Check
+    //     printGrid(): void {
+    //         for (let i = 0; i < this.rows; i++) {
+    //             let row = '';
+    //             for (let j = 0; j < this.cols; j++) {
+    //                 row += this.grid[i][j].player + '-' + this.grid[i][j].atoms + ' ';
+    //             }
+    //             console.log(row);
+    //         }
+    //     }
 
     minimax(depth: number, isMaximizingPlayer: boolean): number {
         if (depth === 0 || this.isGameOver().gameOver) {
@@ -193,9 +196,11 @@ class ChainReactionGame {
             for (let j = 0; j < this.cols; j++) {
                 if (this.grid[i][j].player !== 0) {
                     activePlayers.add(this.grid[i][j].player);
+                    console.log(activePlayers.add(this.grid[i][j].player))
                 }
             }
         }
+
         if (activePlayers.size === 1) {
             return { gameOver: true, winner: [...activePlayers][0] };
         } else {
@@ -203,6 +208,7 @@ class ChainReactionGame {
         }
     }
 
+    // Just for Logic
     undoMove(row: number, col: number): void {
         let cell = this.grid[row][col];
         if (cell.atoms > 0) {
@@ -214,4 +220,5 @@ class ChainReactionGame {
     }
 }
 
-export { ChainReactionGame, Cell };
+export { ChainReactionGame }; export type { Cell };
+

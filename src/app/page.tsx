@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Head from "next/head";
+import Link from "next/link";
 export default function Home() {
   return (
    <main>
@@ -19,7 +19,10 @@ export default function Home() {
         </p>
 
         <button className="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">
-          Start Game
+          <Link href="/game">
+            Start Game
+          </Link>
+          
         </button>
         <footer className="mt-auto py-4">
         <p className="text-gray-500">
