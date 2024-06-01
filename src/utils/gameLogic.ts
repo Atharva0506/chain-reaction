@@ -11,7 +11,7 @@ class ChainReactionGame {
     grid: Cell[][];
     turnComplete: boolean;
     turnCounter: number;
-
+    movesMade: number[]; // Track the number of moves made by each player
 
     constructor(rows: number, cols: number, numPlayers: number) {
         this.rows = rows;
@@ -21,6 +21,7 @@ class ChainReactionGame {
         this.grid = this.createGrid();
         this.turnComplete = false;
         this.turnCounter = 0; // Counter to keep track of the number of turns
+        this.movesMade = Array(numPlayers).fill(0); // Initialize the movesMade array
     }
 
     createGrid(): Cell[][] {
@@ -41,6 +42,7 @@ class ChainReactionGame {
             cell.player = this.currentPlayer;
             cell.atoms++;
             this.checkExplosions(row, col);
+            this.movesMade[this.currentPlayer - 1]++; // Increment the move count for the current player
             return true;
         }
         return false;
@@ -91,37 +93,32 @@ class ChainReactionGame {
 
     getHeuristicValue(): number {
         const currentPlayerScore = this.calculateScore(this.currentPlayer);
-        const opponentPlayer = this.currentPlayer === 1 ? 2 : 1;
-        const opponentPlayerScore = this.calculateScore(opponentPlayer);
+        const opponentScores = [];
+        for (let player = 1; player <= this.numPlayers; player++) {
+            if (player !== this.currentPlayer) {
+                opponentScores.push(this.calculateScore(player));
+            }
+        }
+        const maxOpponentScore = Math.max(...opponentScores);
         if (currentPlayerScore === 0) {
             return Number.NEGATIVE_INFINITY;
-        } else if (opponentPlayerScore === 0) {
+        } else if (maxOpponentScore === 0) {
             return Number.POSITIVE_INFINITY;
         } else {
-            return currentPlayerScore - opponentPlayerScore;
+            return currentPlayerScore - maxOpponentScore;
         }
     }
 
     switchPlayer(): void {
-        this.currentPlayer = (this.currentPlayer % this.numPlayers) + 1;
+        let initialPlayer = this.currentPlayer;
+        let allPlayersMoved = this.movesMade.every(moves => moves > 0);
+
+        do {
+            this.currentPlayer = (this.currentPlayer % this.numPlayers) + 1;
+        } while (allPlayersMoved && this.calculateScore(this.currentPlayer) === 0 && this.currentPlayer !== initialPlayer);
+
         this.turnComplete = false;
     }
-
-    // endTurn(): void {
-    //     this.turnComplete = true;
-    // }
-
-
-    //    Just For Node JS Check
-    //     printGrid(): void {
-    //         for (let i = 0; i < this.rows; i++) {
-    //             let row = '';
-    //             for (let j = 0; j < this.cols; j++) {
-    //                 row += this.grid[i][j].player + '-' + this.grid[i][j].atoms + ' ';
-    //             }
-    //             console.log(row);
-    //         }
-    //     }
 
     minimax(depth: number, isMaximizingPlayer: boolean): number {
         if (depth === 0 || this.isGameOver().gameOver) {
@@ -196,7 +193,6 @@ class ChainReactionGame {
             for (let j = 0; j < this.cols; j++) {
                 if (this.grid[i][j].player !== 0) {
                     activePlayers.add(this.grid[i][j].player);
-                    console.log(activePlayers.add(this.grid[i][j].player))
                 }
             }
         }
@@ -208,7 +204,6 @@ class ChainReactionGame {
         }
     }
 
-    // Just for Logic
     undoMove(row: number, col: number): void {
         let cell = this.grid[row][col];
         if (cell.atoms > 0) {
@@ -220,5 +215,5 @@ class ChainReactionGame {
     }
 }
 
-export { ChainReactionGame }; export type { Cell };
-
+export { ChainReactionGame };
+export type { Cell };
