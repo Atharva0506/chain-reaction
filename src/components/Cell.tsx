@@ -1,14 +1,23 @@
-// components/Cell.tsx
 import React from "react";
 
 interface CellProps {
   row: number;
   column: number;
   onClick: (row: number, column: number) => void;
-  currentPlayer: number; // Add currentPlayer prop
+  currentPlayer: number; 
   player: number;
   atoms: number;
 }
+
+
+const playerColors = [
+  "bg-white",     
+  "bg-red-500",   
+  "bg-blue-500",  
+  "bg-green-500", 
+  "bg-yellow-500",
+  "bg-purple-500",]
+
 
 const Cell: React.FC<CellProps> = ({
   row,
@@ -19,30 +28,24 @@ const Cell: React.FC<CellProps> = ({
   currentPlayer,
 }) => {
   const handleClick = () => {
-    // Check if the cell is empty or belongs to the current player before allowing placement
     if (player === 0 || player === currentPlayer) {
-      onClick(row, column); // Call onClick callback to place atom
+      onClick(row, column); 
     }
   };
 
   return (
-   
-      <div
-        className={`w-10 h-10 border border-[#0f172a] cursor-pointer ${
-          player === 0
-            ? "bg-white"
-            : player === 1
-            ? "bg-red-500"
-            : "bg-blue-500"
-        }`}
-        onClick={handleClick}
-      >
-        {atoms > 0 && (
-          <div className="w-full h-full flex justify-center items-center">
-            {atoms}
-          </div>
-        )}
-      </div>
+    <div
+      className={`w-10 h-10 border border-[#0f172a] cursor-pointer ${
+        playerColors[player] 
+      }`}
+      onClick={handleClick}
+    >
+      {atoms > 0 && (
+        <div className="w-full h-full flex justify-center items-center">
+          {atoms}
+        </div>
+      )}
+    </div>
   );
 };
 

@@ -9,7 +9,7 @@ interface GameBoardProps {
 }
 
 const GameBoard: React.FC<GameBoardProps> = ({ rows, columns }) => {
-  const [game, setGame] = useState(new ChainReactionGame(rows, columns, 3)); //  passing Rows and  cols and no of plauyers
+  const [game, setGame] = useState(new ChainReactionGame(rows, columns, 4)); //  passing Rows and  cols and no of plauyers
   const [grid, setGrid] = useState(game.grid);
   const [turns,setTurns] = useState(0)
   const currentPlayer = game.currentPlayer;
