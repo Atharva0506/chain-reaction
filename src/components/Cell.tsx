@@ -4,7 +4,7 @@ interface CellProps {
   row: number;
   column: number;
   onClick: (row: number, column: number) => void;
-  currentPlayer: number; 
+  currentPlayer: number | null; 
   player: number;
   atoms: number;
 }

@@ -11,7 +11,7 @@ class ChainReactionGame {
     grid: Cell[][];
     turnComplete: boolean;
     turnCounter: number;
-    movesMade: number[]; // Track the number of moves made by each player
+    movesMade: number[]; 
 
     constructor(rows: number, cols: number, numPlayers: number) {
         this.rows = rows;
@@ -91,24 +91,6 @@ class ChainReactionGame {
         return score;
     }
 
-    getHeuristicValue(): number {
-        const currentPlayerScore = this.calculateScore(this.currentPlayer);
-        const opponentScores = [];
-        for (let player = 1; player <= this.numPlayers; player++) {
-            if (player !== this.currentPlayer) {
-                opponentScores.push(this.calculateScore(player));
-            }
-        }
-        const maxOpponentScore = Math.max(...opponentScores);
-        if (currentPlayerScore === 0) {
-            return Number.NEGATIVE_INFINITY;
-        } else if (maxOpponentScore === 0) {
-            return Number.POSITIVE_INFINITY;
-        } else {
-            return currentPlayerScore - maxOpponentScore;
-        }
-    }
-
     switchPlayer(): void {
         let initialPlayer = this.currentPlayer;
         let allPlayersMoved = this.movesMade.every(moves => moves > 0);
@@ -118,68 +100,6 @@ class ChainReactionGame {
         } while (allPlayersMoved && this.calculateScore(this.currentPlayer) === 0 && this.currentPlayer !== initialPlayer);
 
         this.turnComplete = false;
-    }
-
-    minimax(depth: number, isMaximizingPlayer: boolean): number {
-        if (depth === 0 || this.isGameOver().gameOver) {
-            return this.getHeuristicValue();
-        }
-
-        if (isMaximizingPlayer) {
-            let maxEval = Number.NEGATIVE_INFINITY;
-            for (let i = 0; i < this.rows; i++) {
-                for (let j = 0; j < this.cols; j++) {
-                    if (this.isValidMove(i, j, this.currentPlayer)) {
-                        this.placeAtom(i, j);
-                        this.switchPlayer();
-                        let _eval = this.minimax(depth - 1, false);
-                        this.undoMove(i, j);
-                        this.switchPlayer();
-                        maxEval = Math.max(maxEval, _eval);
-                    }
-                }
-            }
-            return maxEval;
-        } else {
-            let minEval = Number.POSITIVE_INFINITY;
-            for (let i = 0; i < this.rows; i++) {
-                for (let j = 0; j < this.cols; j++) {
-                    if (this.isValidMove(i, j, this.currentPlayer)) {
-                        this.placeAtom(i, j);
-                        this.switchPlayer();
-                        let _eval = this.minimax(depth - 1, true);
-                        this.undoMove(i, j);
-                        this.switchPlayer();
-                        minEval = Math.min(minEval, _eval);
-                    }
-                }
-            }
-            return minEval;
-        }
-    }
-
-    findBestMove(depth: number): { row: number, col: number } {
-        let bestMove = { row: -1, col: -1 };
-        let bestValue = Number.NEGATIVE_INFINITY;
-
-        for (let i = 0; i < this.rows; i++) {
-            for (let j = 0; j < this.cols; j++) {
-                if (this.isValidMove(i, j, this.currentPlayer)) {
-                    this.placeAtom(i, j);
-                    this.switchPlayer();
-                    let moveValue = this.minimax(depth - 1, false);
-                    this.undoMove(i, j);
-                    this.switchPlayer();
-
-                    if (moveValue > bestValue) {
-                        bestMove = { row: i, col: j };
-                        bestValue = moveValue;
-                    }
-                }
-            }
-        }
-
-        return bestMove;
     }
 
     isValidMove(row: number, col: number, player: number): boolean {
@@ -196,7 +116,6 @@ class ChainReactionGame {
                 }
             }
         }
-
         if (activePlayers.size === 1) {
             return { gameOver: true, winner: [...activePlayers][0] };
         } else {
