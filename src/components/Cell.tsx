@@ -9,15 +9,14 @@ interface CellProps {
   atoms: number;
 }
 
-
 const playerColors = [
-  "bg-white",     
-  "bg-red-500",   
-  "bg-blue-500",  
-  "bg-green-500", 
-  "bg-yellow-500",
-  "bg-purple-500",]
-
+  "white",    
+  "red",      
+  "blue",     
+  "green",    
+  "yellow",   
+  "purple",   
+];
 
 const Cell: React.FC<CellProps> = ({
   row,
@@ -33,18 +32,36 @@ const Cell: React.FC<CellProps> = ({
     }
   };
 
+  const renderAtoms = () => {
+    const atomElements = [];
+    for (let i = 0; i < atoms; i++) {
+      atomElements.push(
+        <circle
+          key={i}
+          cx="50%"
+          cy="50%"
+          r="10"
+          fill={playerColors[player]}
+          className="atom animate-pulse"
+          style={{
+            transform: `translate(${Math.random() * 20 - 10}px, ${Math.random() * 20 - 10}px)`,
+          }}
+        />
+      );
+    }
+    return atomElements;
+  };
+
   return (
     <div
-      className={`w-10 h-10 border border-[#0f172a] cursor-pointer ${
-        playerColors[player] 
+      className={`w-16 h-16 border border-[#0f172a] cursor-pointer relative flex items-center justify-center ${
+        playerColors[player]
       }`}
       onClick={handleClick}
     >
-      {atoms > 0 && (
-        <div className="w-full h-full flex justify-center items-center">
-          {atoms}
-        </div>
-      )}
+      <svg className="w-full h-full">
+        {renderAtoms()}
+      </svg>
     </div>
   );
 };

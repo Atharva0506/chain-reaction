@@ -65,12 +65,31 @@
       --ring: 212.7 26.8% 83.9%;
     }
   }
-
-  @layer base {
-    * {
-      @apply border-border;
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
     }
-    body {
-      @apply bg-background text-foreground;
+    50% {
+      transform: scale(1.2);
     }
   }
+  
+  @keyframes explode {
+    0% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(2);
+    }
+  }
+  
+  .atom {
+    animation: pulse 1s infinite;
+  }
+  
+  .atom.explode {
+    animation: explode 0.5s forwards;
+  }
+  
