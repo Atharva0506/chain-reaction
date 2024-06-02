@@ -65,31 +65,43 @@
       --ring: 212.7 26.8% 83.9%;
     }
   }
-  @keyframes pulse {
-    0%, 100% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.2);
-    }
+.atom {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
   }
-  
-  @keyframes explode {
-    0% {
-      opacity: 1;
-      transform: scale(1);
-    }
-    100% {
-      opacity: 0;
-      transform: scale(2);
-    }
+  50% {
+    transform: scale(1.5);
   }
-  
-  .atom {
-    animation: pulse 1s infinite;
+}
+
+.orbit {
+  animation: orbit 5s linear infinite;
+}
+
+@keyframes orbit {
+  0% {
+    transform: rotate(0deg) translateX(20px) rotate(0deg);
   }
-  
-  .atom.explode {
-    animation: explode 0.5s forwards;
+  100% {
+    transform: rotate(360deg) translateX(20px) rotate(-360deg);
   }
-  
+}
+
+.explosion {
+  animation: explode 1s forwards;
+}
+
+@keyframes explode {
+  0% {
+    r: 0;
+    opacity: 1;
+  }
+  100% {
+    r: 50;
+    opacity: 0;
+  }
+}
