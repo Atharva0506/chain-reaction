@@ -1,0 +1,1 @@
+export const INIT_MESSAGE = "init_msg"
