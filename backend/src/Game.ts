@@ -1,18 +1,14 @@
 import { WebSocket } from "ws";
-
+import { ChainReactionGame } from "./GameLogic";
 export class Game{
     public player1 : WebSocket;
     public player2 :  WebSocket;
-    private board :  string;
-    private moves :  string[];
-    private startTime : Date;
+    private chainReactionGame  : ChainReactionGame;
 
     constructor(player1:WebSocket,player2:WebSocket){
         this.player1 = player1;
         this.player2 =  player2;
-        this.board = "";
-        this.moves = [];
-        this.startTime = new Date();
+        this.chainReactionGame = new ChainReactionGame(8,8,2)
     }
     makeMove(socket:WebSocket,move:string){
         // Validation  of Move

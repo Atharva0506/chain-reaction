@@ -4,14 +4,17 @@ import { Game } from "./Game";
 
 export class GameManager {
     private games: Game[];
-    private pendingUser: WebSocket;
+    private pendingUser: WebSocket | null = null;
     private users: WebSocket[];
     constructor() {
         this.games = []
+        this.pendingUser = null;
+        this.users =[]
     }
 
     addUser(socket: WebSocket) {
         this.users.push(socket)
+        this.addHandler(socket)
     }
     removeUser(socket: WebSocket) {
         this.users = this.users.filter(user => user !== socket)
