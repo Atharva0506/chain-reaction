@@ -38,6 +38,7 @@ class ChainReactionGame {
 
     placeAtom(row: number, col: number): boolean {
         if (this.isValidMove(row, col, this.currentPlayer)) {
+            console.log(this.isValidMove(row, col, this.currentPlayer))
             let cell = this.grid[row][col];
             cell.player = this.currentPlayer;
             cell.atoms++;

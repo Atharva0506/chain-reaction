@@ -107,8 +107,11 @@ class ChainReactionGame {
         return cell.player === player || cell.player === 0;
     }
 
-    isGameOver(): { gameOver: boolean, winner: number | null } {
-        let activePlayers = new Set<number>();
+    isGameOver() {
+        if (this.movesMade.reduce((acc, moves) => acc + moves, 0) < this.numPlayers) {
+            return { gameOver: false, winner: null };
+        }
+        let activePlayers = new Set();
         for (let i = 0; i < this.rows; i++) {
             for (let j = 0; j < this.cols; j++) {
                 if (this.grid[i][j].player !== 0) {
@@ -116,12 +119,14 @@ class ChainReactionGame {
                 }
             }
         }
+        
         if (activePlayers.size === 1) {
             return { gameOver: true, winner: [...activePlayers][0] };
         } else {
             return { gameOver: false, winner: null };
         }
     }
+
 
     undoMove(row: number, col: number): void {
         let cell = this.grid[row][col];
@@ -130,6 +135,16 @@ class ChainReactionGame {
             if (cell.atoms === 0) {
                 cell.player = 0;
             }
+        }
+    }
+
+    printGrid() {
+        for (let i = 0; i < this.rows; i++) {
+            let row = '';
+            for (let j = 0; j < this.cols; j++) {
+                row += this.grid[i][j].player + '-' + this.grid[i][j].atoms + ' ';
+            }
+            console.log(row);
         }
     }
 }
