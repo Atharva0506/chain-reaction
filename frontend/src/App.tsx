@@ -8,7 +8,7 @@ function App() {
 
 
   return (
-    <div className=''>
+    <div className='bg-slate-900 '>
      <BrowserRouter>
       <Routes>
         <Route path="/" element={<Landing/>} /> 
