@@ -8,14 +8,14 @@ function App() {
 
 
   return (
-    <>
+    <div className=''>
      <BrowserRouter>
       <Routes>
         <Route path="/" element={<Landing/>} /> 
         <Route path="/game" element={<Game/>} /> 
       </Routes>
     </BrowserRouter>
-    </>
+    </div>
   )
 }
 
