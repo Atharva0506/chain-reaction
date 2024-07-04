@@ -13,5 +13,4 @@ wss.on('connection', function connection(ws) {
         gameManager.removeUser(ws)
     })
 
-
 });
