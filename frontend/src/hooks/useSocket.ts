@@ -17,6 +17,6 @@ export const useSocket = () =>{
 
         return () => {ws.close()}
     },[])
-    return socketl;
+    return socket;
 
 }
