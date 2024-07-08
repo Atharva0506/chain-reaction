@@ -43,18 +43,33 @@ const Game = () => {
     };
   }, [socket, game]);
 
-  // if (!socket) return <div>Connecting...</div>
+  const handlePlayNow = () => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      const initMessage = { type: INIT_MESSAGE };
+      socket.send(JSON.stringify(initMessage));
+    }
+  };
+
+  const onCellClick = (row:number, col:number) => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      const moveMessage = { type: MOVE, payload: { row, col } };
+      socket.send(JSON.stringify(moveMessage));
+    }
+  };
+
+  if (!socket) return <div>Connecting...</div>;
+
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="flex flex-col lg:flex-row items-center justify-between w-full max-w-6xl p-4">
         {/* Game Board */}
         <div className="p-8 shadow-lg mb-4 lg:mb-0 lg:mr-4 flex-1">
           <h2 className="text-xl font-bold text-white">Game Board</h2>
-          <GameBoard board={board} />
+          <GameBoard board={board} onCellClick={onCellClick} />
         </div>
         <div className="p-8 shadow-lg flex-1">
           <h2 className="text-xl font-bold">Buttons</h2>
-          <Button onClick={() => setStarted(true)}>Play Now</Button>
+          <Button onClick={handlePlayNow}>Play Now</Button>
         </div>
       </div>
     </div>
