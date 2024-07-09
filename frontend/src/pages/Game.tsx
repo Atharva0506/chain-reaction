@@ -1,64 +1,81 @@
-import  { useEffect, useState } from 'react'
-import GameBoard from '../components/GameBoard'
-import { Button } from '../components/Button'
-import { useSocket } from '../hooks/useSocket'
+import { useEffect, useState } from "react";
+import GameBoard from "../components/GameBoard";
+import { Button } from "../components/Button";
+import { useSocket } from "../hooks/useSocket";
+import { ChainReactionGame } from "../utils/game";
 
-export const INIT_MESSAGE = "INIT_MSG"
-export const MOVE =  "MOVE"
-export const CURRENT_SATTE = "GAME_STATE"
-export const GAME_OVER = "GAME_OVER"
-
+export const INIT_MESSAGE = "INIT_MSG";
+export const MOVE = "MOVE";
+export const CURRENT_SATTE = "GAME_STATE";
+export const GAME_OVER = "GAME_OVER";
 
 const Game = () => {
-
-  const socket =  useSocket();
+  const socket = useSocket();
+  const [game, setGame] = useState(new ChainReactionGame(8, 8, 2));
+  const [board, setBoard] = useState(game.createGrid());
+  const [started, setStarted] = useState(false);
   useEffect(() => {
-    if (!socket) { 
-      console.log("Socket is not available");
-      return; 
+    if (!socket) {
+      return;
     }
 
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      console.log("Message received:", message);
-
       switch (message.type) {
         case INIT_MESSAGE:
-          alert("xxxxxx");
-          console.log("Init Message");
+          setGame(
+            new ChainReactionGame(8,8,2  )
+          );
+          setBoard(game.createGrid());
+          setStarted(true);
           break;
         case MOVE:
-          console.log("Move Message");
-          break;
-        case CURRENT_STATE:
-          console.log("Current State Message");
+          const { row, col } = message;
+          game.placeAtom(row, col);
+          setBoard([...game.grid]);
           break;
         case GAME_OVER:
-          console.log("Game Over Message");
+          console.log("Game over. Winner:", message.winner);
           break;
         default:
           console.log("Unknown message type:", message.type);
       }
     };
   }, [socket]);
-
-  // if(!socket) return <div>Connectingg...</div>
+  const handleMove = (row: number, col: number) => {
+    if (!started) return;
+    if (game.placeAtom(row, col)) {
+        socket.send(JSON.stringify({
+            type: MOVE,
+            row,
+            col,
+            player: game.currentPlayer
+        }));
+        game.switchPlayer();
+        setBoard([...game.grid]);
+    }
+};
+  if (!socket) return <div>Connectingg...</div>;
   return (
-    <div className='h-screen bg-white flex justify-around items-center'>
-      <div className=''>
-        <GameBoard />
+    <div className="h-screen bg-white flex justify-around items-center">
+      <div className="">
+      <GameBoard board={board} onCellClick={handleMove} />
       </div>
       <div>
-        <Button onClick={()=>{
-          socket.send(JSON.stringify({
-            type: INIT_MESSAGE
-          }))
-        }}>
+        <Button
+          onClick={() => {
+            socket.send(
+              JSON.stringify({
+                type: INIT_MESSAGE,
+              })
+            );
+          }}
+        >
           Play
         </Button>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Game
+export default Game;
