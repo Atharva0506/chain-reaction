@@ -8,7 +8,6 @@ export const useSocket = () =>{
     useEffect(()=>{
         const ws  = new WebSocket(WS_URL)
         ws.onopen = ()=>{
-            console.log("Connected ")
             setSocket(ws)
         }
         ws.onclose = ()=>{

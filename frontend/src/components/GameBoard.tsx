@@ -1,6 +1,6 @@
 import React from 'react'
 
-const GameBoard = () => {
+const GameBoard = ( ) => {
   return (
     <div>GameBoard</div>
   )
