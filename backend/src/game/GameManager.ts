@@ -1,5 +1,5 @@
 import { WebSocket } from "ws";
-import { INIT_GAME } from "../message";
+import { INIT_GAME, MOVE } from "../message";
 import { Game } from "./Game";
 
 
@@ -15,7 +15,7 @@ export class GameManager {
 
     addUser(ws: WebSocket) {
         this.users.push(ws)
-        this.addUser(ws)
+        this.handleMessage(ws)
     }
 
     removeUser(ws: WebSocket) {
@@ -26,7 +26,8 @@ export class GameManager {
     private handleMessage(ws: WebSocket) {
         ws.on('message', (data) => {
             const message = JSON.parse(data.toString())
-
+// ============================= Move THis To diffrent File  ================================ //
+           // ========== INIT GAME =========== //
             if (message.type === INIT_GAME) {
                 if (this.pendingUser) {
                     const game = new Game(this.pendingUser, ws)
@@ -34,6 +35,14 @@ export class GameManager {
                     this.pendingUser = null;
                 } else {
                     this.pendingUser = ws;
+                }
+            }
+
+            // ========= HANDLE MOVES ============= //
+            if(message.type === MOVE){
+                const game = this.games.find(game => game.player1 === ws || game.player2 === ws)
+                if (game) {
+                    game.makeMove(ws, message.move)
                 }
             }
         })
