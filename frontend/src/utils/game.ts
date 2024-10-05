@@ -25,9 +25,9 @@ class ChainReactionGame {
     }
 
     createGrid(): Cell[][] {
-        const grid: Cell[][] = [];
+        let grid: Cell[][] = [];
         for (let i = 0; i < this.rows; i++) {
-            const row: Cell[] = [];
+            let row: Cell[] = [];
             for (let j = 0; j < this.cols; j++) {
                 row.push({ player: 0, atoms: 0 });
             }
@@ -38,7 +38,7 @@ class ChainReactionGame {
 
     placeAtom(row: number, col: number): boolean {
         if (this.isValidMove(row, col, this.currentPlayer)) {
-            const cell = this.grid[row][col];
+            let cell = this.grid[row][col];
             cell.player = this.currentPlayer;
             cell.atoms++;
             this.checkExplosions(row, col);
@@ -49,8 +49,8 @@ class ChainReactionGame {
     }
 
     checkExplosions(row: number, col: number): void {
-        const cell = this.grid[row][col];
-        const criticalMass = this.getCriticalMass(row, col);
+        let cell = this.grid[row][col];
+        let criticalMass = this.getCriticalMass(row, col);
         if (cell.atoms >= criticalMass) {
             cell.atoms -= criticalMass;
             this.grid[row][col] = { player: 0, atoms: 0 };
@@ -92,8 +92,8 @@ class ChainReactionGame {
     }
 
     switchPlayer(): void {
-        const initialPlayer = this.currentPlayer;
-        const allPlayersMoved = this.movesMade.every(moves => moves > 0);
+        let initialPlayer = this.currentPlayer;
+        let allPlayersMoved = this.movesMade.every(moves => moves > 0);
 
         do {
             this.currentPlayer = (this.currentPlayer % this.numPlayers) + 1;
@@ -103,7 +103,7 @@ class ChainReactionGame {
     }
 
     isValidMove(row: number, col: number, player: number): boolean {
-        const cell = this.grid[row][col];
+        let cell = this.grid[row][col];
         return cell.player === player || cell.player === 0;
     }
 
@@ -111,7 +111,7 @@ class ChainReactionGame {
         if (this.movesMade.reduce((acc, moves) => acc + moves, 0) < this.numPlayers) {
             return { gameOver: false, winner: null };
         }
-        const activePlayers = new Set();
+        let activePlayers = new Set();
         for (let i = 0; i < this.rows; i++) {
             for (let j = 0; j < this.cols; j++) {
                 if (this.grid[i][j].player !== 0) {
@@ -129,7 +129,7 @@ class ChainReactionGame {
 
 
     undoMove(row: number, col: number): void {
-        const cell = this.grid[row][col];
+        let cell = this.grid[row][col];
         if (cell.atoms > 0) {
             cell.atoms--;
             if (cell.atoms === 0) {
