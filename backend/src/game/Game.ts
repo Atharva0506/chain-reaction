@@ -20,33 +20,35 @@ export class Game {
     }
 
     makeMove(socket: WebSocket, move: { row: string; col: string }) {
+        console.log("Processing move:", move); // Add this to debug the move data
         const currentPlayer = socket === this.player1 ? 1 : 2;
         if (currentPlayer !== this.chainReactionGame.currentPlayer) {
-            socket.send(JSON.stringify({ type: INVALID_MOVE, message: "Not your turn!" }));
-            return { valid: false, gameOver: false };
+          socket.send(JSON.stringify({ type: INVALID_MOVE, message: "Not your turn!" }));
+          return { valid: false, gameOver: false };
         }
-
+      
         const isValidMove = this.chainReactionGame.placeAtom(Number(move.row), Number(move.col));
         if (isValidMove) {
-            const gameState = {
-                grid: this.chainReactionGame.grid,
-                currentPlayer: this.chainReactionGame.currentPlayer
-            };
-            this.broadcastGameState(gameState);
+          const gameState = {
+            grid: this.chainReactionGame.grid,
+            currentPlayer: this.chainReactionGame.currentPlayer
+          };
+          this.broadcastGameState(gameState);
         } else {
-            socket.send(JSON.stringify({ type: INVALID_MOVE, message: "Invalid move!" }));
-            return { valid: false, gameOver: false };
+          socket.send(JSON.stringify({ type: INVALID_MOVE, message: "Invalid move!" }));
+          return { valid: false, gameOver: false };
         }
-
+      
         const gameOverState = this.chainReactionGame.isGameOver();
         if (gameOverState.gameOver) {
-            this.broadcastGameOver(String(gameOverState.winner));
-            return { valid: true, gameOver: true };
+          this.broadcastGameOver(String(gameOverState.winner));
+          return { valid: true, gameOver: true };
         }
-
+      
         this.chainReactionGame.switchPlayer();
         return { valid: true, gameOver: false };
-    }
+      }
+      
 
     private broadcastGameState(gameState: any) {
         this.player1.send(JSON.stringify({ type: CURRENT_STATE, payload: gameState }));

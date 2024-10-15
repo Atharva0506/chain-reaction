@@ -15,6 +15,27 @@ export class GameManager {
 
   addUser(ws: WebSocket) {
     this.users.push(ws);
+    if (this.pendingUser) {
+      // If there's already a pending user, start a new game with both users
+      const player1 = this.pendingUser;
+      const player2 = ws;
+      const game = new Game(player1, player2); // Assuming Game takes two players
+      this.games.push(game);
+      this.pendingUser = null;
+
+      // Notify both players that the game has started
+      player1.send(JSON.stringify({ type: INIT_GAME }));
+      player2.send(JSON.stringify({ type: INIT_GAME }));
+      
+      console.log("Game started between two players");
+
+    } else {
+      // If no pending user, make this user the pending user
+      this.pendingUser = ws;
+      ws.send(JSON.stringify({ type: "waiting", message: "Waiting for an opponent..." }));
+      console.log("Waiting for an opponent...");
+    }
+    
     this.handleMessage(ws);
   }
 
@@ -31,29 +52,22 @@ export class GameManager {
 
   private handleMessage(ws: WebSocket) {
     ws.on("message", (data) => {
+      
       try {
         const message = JSON.parse(data.toString());
-
-        if (message.type === INIT_GAME) {
-          if (this.pendingUser) {
-            const game = new Game(this.pendingUser, ws);
-            this.games.push(game);
-
-            this.pendingUser.send(JSON.stringify({ type: INIT_GAME }));
-            ws.send(JSON.stringify({ type: INIT_GAME }));
-
-            this.pendingUser = null;
-          } else {
-            this.pendingUser = ws;
-          }
-        } else if (message.type === MOVE) {
+        console.log("Received message:", message); // Add this line to log incoming messages
+    
+        if (message.type === MOVE) {
+          console.log("Move message received:", message.payload); // Log the move data
           const game = this.games.find(
             (game) => game.player1 === ws || game.player2 === ws
           );
           if (game) {
-            const moveResult = game.makeMove(ws, message.move);
+            // Extract move from message.payload, not message.move
+            const { row, col } = message.payload;
+            const moveResult = game.makeMove(ws, { row, col }); // Pass the move data properly
             if (moveResult.valid) {
-              this.broadcastMove(game, message.move, ws);
+              this.broadcastMove(game, { row, col }, ws); // Broadcast the correct move
               if (moveResult.gameOver) {
                 this.endGame(game, ws);
               }
@@ -67,13 +81,12 @@ export class GameManager {
             }
           }
         }
+        
       } catch (error) {
         console.error("Error handling message:", error);
         ws.close();
       }
     });
-
-    ws.on("close", () => this.removeUser(ws));
   }
 
   private broadcastMove(game: Game, move: any, currentPlayer: WebSocket) {
