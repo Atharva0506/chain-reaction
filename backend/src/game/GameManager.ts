@@ -3,42 +3,40 @@ import { INIT_GAME, MOVE, GAME_OVER, INVALID_MOVE } from "../message";
 import { Game } from "./Game";
 
 export class GameManager {
-  private games: Game[];
-  private pendingUser: WebSocket | null;
-  private users: WebSocket[];
+  private games: Game[] = [];
+  private pendingUser: WebSocket | null = null;
+  private users: WebSocket[] = [];
 
-  constructor() {
-    this.games = [];
-    this.pendingUser = null;
-    this.users = [];
-  }
-
+  // Function to add user
   addUser(ws: WebSocket) {
     this.users.push(ws);
+    console.log(`User added. Total users: ${this.users.length}`);
+
     if (this.pendingUser) {
       // If there's already a pending user, start a new game with both users
       const player1 = this.pendingUser;
       const player2 = ws;
-      const game = new Game(player1, player2); // Assuming Game takes two players
+      const game = new Game(player1, player2); // Start the game between player1 and player2
       this.games.push(game);
-      this.pendingUser = null;
+      this.pendingUser = null;  // Reset pending user
 
       // Notify both players that the game has started
-      player1.send(JSON.stringify({ type: INIT_GAME }));
-      player2.send(JSON.stringify({ type: INIT_GAME }));
-      
-      console.log("Game started between two players");
+      player1.send(JSON.stringify({ type: INIT_GAME, payload: { color: "blue", isMyTurn: true } }));
+      player2.send(JSON.stringify({ type: INIT_GAME, payload: { color: "yellow", isMyTurn: false } }));
+
+      console.log("Game started between two players.");
 
     } else {
-      // If no pending user, make this user the pending user
+      // If no pending user, this user becomes the pending one
       this.pendingUser = ws;
       ws.send(JSON.stringify({ type: "waiting", message: "Waiting for an opponent..." }));
       console.log("Waiting for an opponent...");
     }
-    
+
     this.handleMessage(ws);
   }
 
+  // Function to remove user
   removeUser(ws: WebSocket) {
     this.users = this.users.filter((user) => user !== ws);
     const game = this.games.find(
@@ -50,24 +48,25 @@ export class GameManager {
     }
   }
 
+  // Function to handle messages
   private handleMessage(ws: WebSocket) {
     ws.on("message", (data) => {
-      
       try {
         const message = JSON.parse(data.toString());
-        console.log("Received message:", message); // Add this line to log incoming messages
-    
+        console.log("Received message:", message);  // Log the incoming message
+
         if (message.type === MOVE) {
-          console.log("Move message received:", message.payload); // Log the move data
+          console.log("Move message received:", message.payload); // Log move data
+
           const game = this.games.find(
             (game) => game.player1 === ws || game.player2 === ws
           );
           if (game) {
-            // Extract move from message.payload, not message.move
-            const { row, col } = message.payload;
-            const moveResult = game.makeMove(ws, { row, col }); // Pass the move data properly
+            const { row, col } = message.payload; // Extract row and col from move
+            const moveResult = game.makeMove(ws, { row, col });
+
             if (moveResult.valid) {
-              this.broadcastMove(game, { row, col }, ws); // Broadcast the correct move
+              this.broadcastMove(game, { row, col }, ws);
               if (moveResult.gameOver) {
                 this.endGame(game, ws);
               }
@@ -81,14 +80,14 @@ export class GameManager {
             }
           }
         }
-        
       } catch (error) {
         console.error("Error handling message:", error);
-        ws.close();
+        ws.close(); // Close the connection in case of an error
       }
     });
   }
 
+  // Broadcast move to both players
   private broadcastMove(game: Game, move: any, currentPlayer: WebSocket) {
     const opponent = game.player1 === currentPlayer ? game.player2 : game.player1;
     currentPlayer.send(
@@ -99,6 +98,7 @@ export class GameManager {
     );
   }
 
+  // End the game
   private endGame(game: Game, winner: WebSocket) {
     const loser = game.player1 === winner ? game.player2 : game.player1;
 
