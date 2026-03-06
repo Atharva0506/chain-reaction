@@ -1,0 +1,15 @@
+node_modules
+dist
+.next
+.turbo
+*.log
+.env
+.env.local
+.env.production
+coverage
+.DS_Store
+tmp
+*.exe
+*.dll
+*.so
+*.dylib

@@ -1,0 +1,29 @@
+{
+  "name": "chain-reaction",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "clean": "turbo clean",
+    "dev:web": "cd apps/web && npm run dev",
+    "dev:server": "cd apps/server && go run cmd/server/main.go",
+    "db:push": "cd apps/web && npx prisma db push",
+    "db:generate": "cd apps/web && npx prisma generate",
+    "db:migrate": "cd apps/web && npx prisma migrate dev",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.0",
+    "typescript": "^5.7.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "npm@10.0.0"
+}

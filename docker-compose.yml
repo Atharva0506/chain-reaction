@@ -1,0 +1,61 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: chain
+      POSTGRES_PASSWORD: chain_secret
+      POSTGRES_DB: chain_reaction
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chain -d chain_reaction"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://chain:chain_secret@postgres:5432/chain_reaction
+      SERVER_ADDR: ":8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://chain:chain_secret@postgres:5432/chain_reaction
+      NEXT_PUBLIC_WS_URL: ws://localhost:8080/ws
+      NEXT_PUBLIC_API_URL: http://localhost:8080/api
+    depends_on:
+      - server
+
+volumes:
+  pgdata:
+  redisdata:
